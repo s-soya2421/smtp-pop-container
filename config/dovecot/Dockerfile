@@ -11,6 +11,6 @@ RUN mkdir -p /var/mail /var/log/dovecot && \
     chown -R vmail:vmail /var/mail && \
     chown -R dovecot:dovecot /var/log/dovecot
 
-EXPOSE 24 110 143 993 995
+EXPOSE 24 110 143
 
 CMD ["dovecot", "-F"]

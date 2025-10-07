@@ -1,0 +1,38 @@
+queue_directory = /var/spool/postfix
+data_directory = /var/lib/postfix
+command_directory = /usr/sbin
+daemon_directory = /usr/lib/postfix
+mail_owner = postfix
+setgid_group = postdrop
+
+myhostname = mail.example.com
+mydomain = example.com
+myorigin = $mydomain
+inet_interfaces = all
+inet_protocols = ipv4
+mydestination = $myhostname, localhost.$mydomain, localhost
+
+# Allow submissions coming from the lab network / localhost
+mynetworks = 127.0.0.0/8 [::1]/128 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination
+
+# Virtual mailbox delivery via Dovecot LMTP
+virtual_mailbox_domains = example.com
+virtual_mailbox_maps = hash:/etc/postfix/virtual_mailboxes
+virtual_transport = lmtp:inet:dovecot:24
+lmtp_destination_recipient_limit = 1
+
+# Basic behaviour suitable for the lab
+smtpd_banner = $myhostname ESMTP test lab ready
+biff = no
+append_dot_mydomain = no
+recipient_delimiter = +
+local_recipient_maps =
+
+# Disable TLS for simplicity inside the lab environment
+smtp_tls_security_level = none
+smtpd_tls_security_level = none
+smtp_tls_note_starttls_offer = no
+
+# Log to a file so it can be tailed from the host
+maillog_file = /var/log/postfix/maillog

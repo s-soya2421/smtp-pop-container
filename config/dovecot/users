@@ -1,0 +1,7 @@
+# Dovecotユーザーファイル（検証用）
+# フォーマット: username:password:uid:gid::/var/mail/username::
+# パスワードはプレーンテキスト（検証用のため）
+
+testuser:{PLAIN}testpass:1000:1000::/var/mail/testuser::
+user1:{PLAIN}password1:1000:1000::/var/mail/user1::
+user2:{PLAIN}password2:1000:1000::/var/mail/user2::

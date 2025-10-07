@@ -8,7 +8,8 @@
     "test:smtp": "tsx src/test-smtp.ts",
     "test:pop": "tsx src/test-pop.ts",
     "send:mail": "tsx src/send-test-mail.ts",
-    "test:all": "npm run test:smtp && npm run test:pop && npm run send:mail"
+    "test:flow": "tsx src/test-flow.ts",
+    "test:all": "npm run test:smtp && npm run test:pop && npm run send:mail && npm run test:flow"
   },
   "keywords": ["smtp", "pop3", "mail", "testing"],
   "author": "",

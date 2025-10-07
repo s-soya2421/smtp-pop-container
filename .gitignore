@@ -1,32 +1,26 @@
-# ログファイル
+.DS_Store
+Thumbs.db
+
+# バイナリ／ログ出力
 logs/
 *.log
-
-# パケットキャプチャファイル
 pcap/
 *.pcap
 *.cap
-
-# Docker volumes
 maildata/
+coverage/
 
-# Node.js
+# Node.js / TypeScript
 node_modules/
+dist/
+*.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 package-lock.json
 yarn.lock
 
-# TypeScript
-dist/
-*.tsbuildinfo
-
-# OS固有
-.DS_Store
-Thumbs.db
-
-# エディタ
+# エディタ設定
 .vscode/
 .idea/
 *.swp

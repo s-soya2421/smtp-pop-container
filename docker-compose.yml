@@ -39,9 +39,7 @@ services:
     hostname: pop.example.com
     ports:
       - "110:110"   # POP3
-      - "995:995"   # POP3S
       - "143:143"   # IMAP
-      - "993:993"   # IMAPS
     volumes:
       - ./config/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
       - ./config/dovecot/users:/etc/dovecot/users:ro
@@ -56,7 +54,7 @@ services:
     image: nicolaka/netshoot:latest
     container_name: packet-capture
     entrypoint: /bin/sh
-    command: -c "tcpdump -i any -w /pcap/capture-$$(date +%Y%m%d-%H%M%S).pcap -v 'port 25 or port 110 or port 143 or port 587 or port 993 or port 995 or port 1025' 2>&1 | tee /logs/tcpdump.log"
+    command: -c "tcpdump -i any -w /pcap/capture-$$(date +%Y%m%d-%H%M%S).pcap -v 'port 25 or port 110 or port 143 or port 587 or port 1025' 2>&1 | tee /logs/tcpdump.log"
     volumes:
       - ./pcap:/pcap
       - ./logs:/logs

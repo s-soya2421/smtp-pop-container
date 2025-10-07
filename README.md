@@ -1,5 +1,7 @@
 # SMTP/POP検証コンテナ環境
 
+> 🛠️ 現在も検証・改善を続けているサーバ環境です。挙動や設定を試しながら更新しているため、最新の変更内容はリポジトリで確認してください。
+
 Dockerを使用したSMTP/POPサーバの動作検証環境です。パケットレベルのログ取得とエラー監視を行っていろいろ勉強するために使う
 
 > ⚠️ **検証専用です。** 本環境の利用によって生じたいかなる結果についても作成者・依頼者は責任を負いません。 実運用へ転用する場合はすべて自己責任で対処してください。
@@ -28,7 +30,8 @@ Postfix が SMTP を受信し、Dovecot の LMTP に転送して Maildir を更�
 ├── src/                       # TypeScriptソースコード
 │   ├── test-smtp.ts          # SMTPテスト（TypeScript）
 │   ├── test-pop.ts           # POPテスト（TypeScript）
-│   └── send-test-mail.ts     # メール送信（TypeScript）
+│   ├── send-test-mail.ts     # メール送信（TypeScript）
+│   └── test-flow.ts          # SMTP→POP一括検証
 ├── config/
 │   ├── postfix/               # Postfix設定とコンテナ定義
 │   │   ├── Dockerfile
@@ -203,10 +206,19 @@ QUIT
 | パスワード | testpass |
 | 暗号化 | なし（検証用） |
 
+### SMTP→POPエンドツーエンド
+
+```bash
+# Postfixへ送信し、Dovecot経由でPOP3から取得
+npm run test:flow
+```
+
+一意のトークンを含んだメールを送信し、POP3で最新メッセージを取得・検証します。
+
 ### 全テストを一括実行
 
 ```bash
-# SMTP, POP, メール送信テストを順次実行
+# SMTP, POP, MailHog送信に加えて Postfix→POP のフローを検証
 npm run test:all
 ```
 
@@ -249,8 +261,6 @@ tcpdumpは以下のポートを監視しています：
 - 110 (POP3)
 - 143 (IMAP)
 - 587 (SMTP Submission)
-- 993 (IMAPS)
-- 995 (POP3S)
 - 1025 (MailHog SMTP)
 
 ## トラブルシューティング
@@ -361,13 +371,18 @@ docker-compose restart dovecot
 
 #### test-pop.ts
 - 複数ユーザーでのPOP3接続テスト
-- USER/PASS認証からSTAT/LIST/UIDLコマンドまで実行
+- USER/PASS認証からSTAT/LIST/UIDL/RETRコマンドまで実行
 - パスワードをマスキングして表示
+- 最新メッセージのプレビューと期待値チェックに対応
 
 #### send-test-mail.ts
 - nodemailerを使用した高レベルAPIでのメール送信
 - HTML形式メール対応
 - SMTP接続の事前検証機能
+
+#### test-flow.ts
+- Postfixへメールを送信し、Dovecot POP3で取得する一連の流れを自動化
+- メール本文に埋め込んだトークンをPOP3で検証して配送確認
 
 ### ビルド（オプション）
 
