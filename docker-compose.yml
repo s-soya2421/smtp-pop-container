@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # SMTPサーバ（Postfix）
+  postfix:
+    build:
+      context: ./config/postfix
+      dockerfile: Dockerfile
+    container_name: smtp-server
+    hostname: mail.example.com
+    ports:
+      - "25:25"
+      - "587:587"
+    volumes:
+      - ./logs/postfix:/var/log/postfix
+    networks:
+      - mail-network
+    depends_on:
+      - dovecot
+    restart: unless-stopped
+
+  # SMTP開発サーバ（MailHog - WebUI付き）
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - mail-network
+    restart: unless-stopped
+
+  # POP/IMAPサーバ（Dovecot）
+  dovecot:
+    build:
+      context: ./config/dovecot
+      dockerfile: Dockerfile
+    container_name: pop-server
+    hostname: pop.example.com
+    ports:
+      - "110:110"   # POP3
+      - "995:995"   # POP3S
+      - "143:143"   # IMAP
+      - "993:993"   # IMAPS
+    volumes:
+      - ./config/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
+      - ./config/dovecot/users:/etc/dovecot/users:ro
+      - ./logs/dovecot:/var/log/dovecot
+      - maildata:/var/mail
+    networks:
+      - mail-network
+    restart: unless-stopped
+
+  # パケットキャプチャ（tcpdump）
+  tcpdump:
+    image: nicolaka/netshoot:latest
+    container_name: packet-capture
+    entrypoint: /bin/sh
+    command: -c "tcpdump -i any -w /pcap/capture-$$(date +%Y%m%d-%H%M%S).pcap -v 'port 25 or port 110 or port 143 or port 587 or port 993 or port 995 or port 1025' 2>&1 | tee /logs/tcpdump.log"
+    volumes:
+      - ./pcap:/pcap
+      - ./logs:/logs
+    networks:
+      - mail-network
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - postfix
+      - dovecot
+      - mailhog
+    restart: unless-stopped
+
+  # ログビューア（オプション）
+  log-viewer:
+    image: amir20/dozzle:latest
+    container_name: log-viewer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+networks:
+  mail-network:
+    driver: bridge
+
+volumes:
+  maildata:
